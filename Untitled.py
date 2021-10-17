@@ -35,7 +35,7 @@ main_dfa.add_trans(6, 7, "*")
 main_dfa.add_trans(7, 7, "[](){}+-<;:,=0123456789/ \n\f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase)
 main_dfa.add_trans(6, 10, "/")
 main_dfa.add_trans(10, 10, "[](){}+-*<;:,=0123456789/ \f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase)
-main_dfa.add_trans(10, 9, "\n") #and EOF
+main_dfa.add_trans(10, 9, "\n\0") #and EOF
 main_dfa.add_trans(7, 8, "*")
 main_dfa.add_trans(8, 8, "*")
 main_dfa.add_trans(8, 7, "[](){}+-<;:,=0123456789 \n\f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase)
