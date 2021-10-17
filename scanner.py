@@ -20,33 +20,44 @@ class DFA:
         return None
 
 
-main_dfa = DFA(14, [1, 3, 5, 9, 12, 13])
+main_dfa = DFA(15, [1, 3, 5, 9, 12, 13])
+
+digit = "0123456789"
+sym = "[](){}+-*<;:,="
+whitespace = " \n\f\r\v\t"
+lower = string.ascii_lowercase
+upper = string.ascii_uppercase
+
 # Symbols
-main_dfa.add_trans(0, 1, "[](){}+-*<;:,")
+main_dfa.add_trans(0, 14, "*")
+main_dfa.add_trans(14, 1, sym + digit + whitespace + lower + upper, False)
+main_dfa.add_trans(0, 1, "[](){}+-<;:,")
 main_dfa.add_trans(0, 2, "=")
 main_dfa.add_trans(2, 1, "=")
-main_dfa.add_trans(2, 3, "0123456789/ \n\f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase, False)
+main_dfa.add_trans(2, 3, "/\0" + digit + whitespace + lower + upper, False)
 # Num
-main_dfa.add_trans(0, 4, "0123456789")
-main_dfa.add_trans(4, 4, "0123456789")
-main_dfa.add_trans(4, 5, "[](){}+-*<;:,=/ \n\f\r\v\t", False)  # without ID or Keyword
+main_dfa.add_trans(0, 4, digit)
+main_dfa.add_trans(4, 4, digit)
+main_dfa.add_trans(4, 5, sym + whitespace + "/\0", False)  # without ID or Keyword
 # comment
 main_dfa.add_trans(0, 6, "/")
 main_dfa.add_trans(6, 7, "*")
-main_dfa.add_trans(7, 7, "[](){}+-<;:,=0123456789/ \n\f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase)
+main_dfa.add_trans(7, 7, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()+,-./:;<=>?@['
+                           '\\]^_`{|}~ \n\t\r\x0b\x0c')
 main_dfa.add_trans(6, 10, "/")
-main_dfa.add_trans(10, 10, "[](){}+-*<;:,=0123456789/ \f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase)
+main_dfa.add_trans(10, 10, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@['
+                           '\\]^_`{|}~ \t\r\x0b\x0c')
 main_dfa.add_trans(10, 9, "\n\0")  # and EOF
 main_dfa.add_trans(7, 8, "*")
 main_dfa.add_trans(8, 8, "*")
-main_dfa.add_trans(8, 7, "[](){}+-<;:,=0123456789 \n\f\r\v\t" + string.ascii_lowercase + string.ascii_uppercase)
+main_dfa.add_trans(8, 7, "[](){}+-<;:,=" + digit + whitespace + lower + upper)
 main_dfa.add_trans(8, 9, "/")
 # ID & Keyword
-main_dfa.add_trans(0, 11, string.ascii_lowercase + string.ascii_uppercase)
-main_dfa.add_trans(11, 11, "0123456789" + string.ascii_lowercase + string.ascii_uppercase)
-main_dfa.add_trans(11, 12, "[](){}+-*<;:,=/ \n\f\r\v\t", False)
+main_dfa.add_trans(0, 11, lower + upper)
+main_dfa.add_trans(11, 11, digit + lower + upper)
+main_dfa.add_trans(11, 12, "/\0" + sym + whitespace, False)
 # whitespaces
-main_dfa.add_trans(0, 13, " \n\f\r\v\t")
+main_dfa.add_trans(0, 13, whitespace)
 
 KEYWORDS = ["if", "else", "void", "int", "repeat", "break", "until", "return"]
 
@@ -65,7 +76,7 @@ def get_next_char():
             EOF = True
             return '\0'
         else:
-            raise Exception("EOF reached, no more chars left!")
+            return None
     return next_char
 
 
@@ -76,26 +87,40 @@ def get_next_token():
     global linen, cur_char
     cur_node = 0
     token = ""
+
+    if cur_char == '\0':
+        return None
+
     while True:
-        if cur_char == '\0':
+        if cur_char is None:
             # TODO: handle EOF
             # print("Oh no EOF and I dont know what to do !")
             return None
             pass
-        next_node = main_dfa.next_state(cur_node, cur_char)
-        if next_node is None:
-            # TODO: handle stuck in a state
-            # print("Oh no we got stuck in state {}".format(cur_node))
-            return None
 
-        if next_node[1]:
+        next_node = main_dfa.next_state(cur_node, cur_char)
+
+        if next_node is None or next_node[1] is True:
             token += cur_char
             if cur_char == '\n':
                 linen += 1
             cur_char = get_next_char()
+
+        if next_node is None:
+            if cur_node == 4:
+                raise Exception("({}, Invalid number)".format(token))
+            elif cur_node == 14:
+                if token == "*/":
+                    raise Exception("(*/, Unmatched comment)")
+                else:
+                    raise Exception("({}, Invalid input)".format(token))
+            elif cur_node == 7 or cur_node == 8:
+                raise Exception("({}..., Unclosed comment) ".format(token[:min(7, len(token))]))
+            else:
+                raise Exception("({}, Invalid input)".format(token))
+
         cur_node = next_node[0]
         if main_dfa.accept[cur_node]:
-            # TODO : different accept types
             if cur_node == 1 or cur_node == 3:  # we found a symbol !
                 return "SYMBOL", token
             elif cur_node == 5:  # we found a num !
