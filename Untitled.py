@@ -4,7 +4,7 @@ from typing import List
 class DFA:
     def __init__(self, num_states: int, acc_states: List[int]):
         self.num_states = num_states
-        self.trans = [None for i in range(num_states)]
+        self.trans = [[] for i in range(num_states)]
         self.accept = [False] * num_states
         for acc in acc_states:
             self.accept[acc] = True
@@ -17,4 +17,3 @@ class DFA:
             if char in chars:
                 return end_node, is_included
         return None
-
