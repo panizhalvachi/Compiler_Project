@@ -101,9 +101,11 @@ def get_next_token():
         next_node = main_dfa.next_state(cur_node, cur_char)
 
         if next_node is None or next_node[1] is True:
-            token += cur_char
+
             if cur_char == '\n':
                 linen += 1
+            else:
+                token += cur_char
             cur_char = get_next_char()
 
         if next_node is None:
