@@ -45,6 +45,7 @@ sym = "[](){}+-*<;:,="
 whitespace = " \n\f\r\v\t"
 lower = string.ascii_lowercase
 upper = string.ascii_uppercase
+valid_chars = upper + lower + whitespace + "[](){}+-<;:,=\0" + digit  # does not include * and / and \0
 
 # Symbols
 main_dfa.add_trans(0, 14, "*")
@@ -52,7 +53,7 @@ main_dfa.add_trans(14, 1, sym + digit + whitespace + lower + upper, False)
 main_dfa.add_trans(0, 1, "[](){}+-<;:,")
 main_dfa.add_trans(0, 2, "=")
 main_dfa.add_trans(2, 1, "=")
-main_dfa.add_trans(2, 3, "/\0" + digit + whitespace + lower + upper, False)
+main_dfa.add_trans(2, 3, "/\0" + sym + digit + whitespace + lower + upper, False) # not sure
 # Num
 main_dfa.add_trans(0, 4, digit)
 main_dfa.add_trans(4, 4, digit)
@@ -122,7 +123,7 @@ def get_next_token():
         next_node = main_dfa.next_state(cur_node, cur_char)  # find the next state base on current one and the next char
 
         # if this char can not be traversed (panic mode) or the transition consume that char :
-        if next_node is None or next_node[1] is True:
+        if (next_node is None or next_node[1] is True) and not (cur_node == 6 and cur_char in valid_chars):
             # replace cur)char with the next one and add the previous one to the token (\n will not be added to token)
             # because it can only occur in whitespace or comment or error, the first 2 does not matter, while in the
             # third we don't want to have it in our error message
