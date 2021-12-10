@@ -119,7 +119,7 @@ def get_next_token():
 
     while True:  # read char from input one by one until we find a valid token or an error occurs
         if cur_char is None:  # if we reach EOF, return none
-            return None
+            return '$'
 
         next_node = main_dfa.next_state(cur_node, cur_char)  # find the next state base on current one and the next char
 

@@ -49,7 +49,7 @@
 48  returnback
 49  Expression-stmt 50  Compound-stmt 50  Selection-stmt 50  Iteration-stmt 50  Return-stmt 50
 50  returnback
-51  Expression 52  epsilon 52  ; 52
+51  Expression 52  ; 53 break 161
 52  ; 53
 53  returnback
 54  if 55
@@ -99,7 +99,7 @@
 98  Relop 99  epsilon 100
 99  Additive-expression 100
 100  returnback
-101  < 102  == 103
+101  < 102  == 102
 102  returnback
 103  Term 104
 104  D 105
@@ -159,3 +159,4 @@
 158  Expression 159
 159  Arg-list-prime 160
 160  returnback
+161  ; 53

@@ -43,16 +43,18 @@ def get_next_token():
             continue
     if token is None:
         raise Exception("EOF reached without termination correctly :(")
+
     return linen, token
 
 
 cur_line_token = get_next_token()
 
 root = None
+syntax_errors_list = []
 
 
 def parse(node, par):
-    global cur_line_token, root
+    global cur_line_token, root, syntax_errors_list
     if node not in none_terminals:
         pre = cur_line_token[1]
         if node != 'epsilon' and pre != '$':
@@ -91,28 +93,51 @@ def parse(node, par):
             if trans_token not in none_terminals and 'epsilon' == trans_token:
                 next_node, next_trans_token = trans_node, trans_token
 
-        if next_node is None:
-            raise Exception("{} {} I dont know where to go :( line 72 parser".format(cur_node, token))
+        if next_node is not None:
+            parse(next_trans_token, cur_any_node)
+            cur_node = next_node
+            continue
 
-        parse(next_trans_token, cur_any_node)
-        cur_node = next_node
+        trans_token, trans_node = nodes_adj[cur_node][0]
+
+        if trans_token in none_terminals and 'epsilon' not in first_sets[trans_token] and token in follow_sets[trans_token]:
+            cur_node = trans_node  # check
+            syntax_errors_list.append("#{} : syntax error, missing {}".format(cur_line_token[0], trans_token))
+
+        elif trans_token in none_terminals:
+            syntax_errors_list.append("#{} : syntax error, illegal {}".format(cur_line_token[0], token))
+            cur_line_token = get_next_token()
+            if cur_line_token[1] == '$':
+                syntax_errors_list.append("#{} : syntax error, Unexpected EOF".format(cur_line_token[0]))
+                raise Exception()
+        else:
+            cur_node = trans_node
+            syntax_errors_list.append("#{} : syntax error, missing {}".format(cur_line_token[0], trans_token))
 
     return cur_any_node
 
 
 def parser():
-    global root
-
-    root = None
-    parse('Program', None)
+    global root, syntax_errors_list
 
     parse_tree_file = open("parse_tree.txt", 'w')
+    syntax_errors_file = open("syntax_errors.txt", 'w')
+    syntax_errors_list = []
+
+    root = None
+    try:
+        parse('Program', None)
+    except:
+        pass
+
+    if len(syntax_errors_list) == 0:
+        syntax_errors_list.append('There is no syntax error.')
+
+    for e in syntax_errors_list:
+        syntax_errors_file.write(e + '\n')
 
     for pre, fill, node in anytree.RenderTree(root):
         parse_tree_file.write("%s%s\n" % (pre, node.name))
 
     parse_tree_file.close()
-
-
-syntax_errors_file = open("syntax_errors.txt", 'w')
-syntax_errors_list = []
+    syntax_errors_file.close()
