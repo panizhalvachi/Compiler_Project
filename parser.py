@@ -48,10 +48,11 @@ def get_next_token():
 
 cur_line_token = get_next_token()
 
+root = None
+
 
 def parse(node, par):
-    print(node)
-    global cur_line_token
+    global cur_line_token, root
     if node not in none_terminals:
         pre = cur_line_token[1]
         if node != 'epsilon' and pre != '$':
@@ -67,6 +68,9 @@ def parse(node, par):
         return anytree.Node(s, parent=par)
 
     cur_any_node = anytree.Node(node, parent=par)
+    if root is None:
+        root = cur_any_node
+
     cur_node = first_node[node]
 
     while nodes_adj[cur_node] is not None:
@@ -96,7 +100,19 @@ def parse(node, par):
     return cur_any_node
 
 
-root = parse('Program', None)
+def parser():
+    global root
 
-for pre, fill, node in anytree.RenderTree(root):
-    print("%s%s" % (pre, node.name))
+    root = None
+    parse('Program', None)
+
+    parse_tree_file = open("parse_tree.txt", 'w')
+
+    for pre, fill, node in anytree.RenderTree(root):
+        parse_tree_file.write("%s%s\n" % (pre, node.name))
+
+    parse_tree_file.close()
+
+
+syntax_errors_file = open("syntax_errors.txt", 'w')
+syntax_errors_list = []
