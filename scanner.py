@@ -78,7 +78,7 @@ main_dfa.add_trans(11, 12, "/\0" + sym + whitespace, False)
 # whitespaces
 main_dfa.add_trans(0, 13, whitespace)
 
-KEYWORDS = ["if", "else", "void", "int", "repeat", "break", "until", "return"]
+KEYWORDS = ["if", "else", "void", "int", "repeat", "break", "until", "return", "endif"]
 
 linen = 1  # indicates which line we are now
 input_path = "input.txt"
@@ -114,7 +114,8 @@ def get_next_token():
     token = ""  # current token
 
     if cur_char == '\0':  # if we reach the EOF, return none
-        return None
+        cur_char = get_next_char()
+        return '$'
 
     while True:  # read char from input one by one until we find a valid token or an error occurs
         if cur_char is None:  # if we reach EOF, return none
