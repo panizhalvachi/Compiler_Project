@@ -1,3 +1,6 @@
+# Mehrshad Mirmohammad 98109634
+# Paniz Halvachi 98109729
+
 import anytree
 
 import scanner
@@ -61,7 +64,7 @@ def parse(node, par):
             cur_line_token = get_next_token()
 
         if node == 'epsilon':
-            s = node
+            s = 'epsilon'
         elif pre == '$':
             s = '$'
         else:
@@ -79,6 +82,7 @@ def parse(node, par):
         token = cur_line_token[1][0]
         if cur_line_token[1][0] in ('SYMBOL', 'KEYWORD'):
             token = cur_line_token[1][1]
+
         next_node, next_trans_token = None, None
         for trans_token, trans_node in nodes_adj[cur_node]:
             if trans_token in none_terminals and token in first_sets[trans_token]:
