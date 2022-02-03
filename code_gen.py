@@ -1,7 +1,7 @@
 import semantic_checks
 
 generated_code = []
-
+#we divided memory into 3 parts. (0,5000) (5000,10000) (10000,...)
 global_section = 5000
 stack_section = 10000
 global_section_ptr = global_section
@@ -9,12 +9,14 @@ global_section_ptr = global_section
 
 def variable_interpret(var, i, stay_with_address=False):
     assert var[1] not in ['#@', '@#']
+    #if variable var is in the stack and we have its address based on stack frame, then we calculate its global address.
     if '$' in var[1]:
         generated_code.append(["ADD",
                                runtime_address_stack_frame[2],
                                '#{}'.format(var[2]),
                                reserved_global_vars[i][2]
                                ])
+        #if we want to accsess the element indirectly, then we use @var as an address of our main variable.
         if '@' in var[1]:
             generated_code.append(["ASSIGN",
                                    '@{}'.format(reserved_global_vars[i][2]),
@@ -149,6 +151,7 @@ def code_gen(routine_name, token, line_n):
     debug_mode = False
     debug_mode2 = False
 
+    #action symbol's subroutines
     if routine_name == 'type_specifier':
         stack.append(token)
     elif routine_name == 'put_id':
@@ -397,8 +400,10 @@ def code_gen(routine_name, token, line_n):
             ['', '', 0],
         ])
         stack.append(['', '', len(generated_code) - 1])
+    #determine jump address for JPF command   
     elif routine_name == 'jpf':
         generated_code[stack.pop()[2]][2] = (len(generated_code))
+    #determine jump address for JPF command and save a block for JP command to fill later       
     elif routine_name == 'jpf_save':
         generated_code[stack.pop()[2]][2] = len(generated_code) + 1  # i+1
         interpret_code([
@@ -406,6 +411,7 @@ def code_gen(routine_name, token, line_n):
             ['', '', 0],
         ])
         stack.append(['', '', len(generated_code) - 1])
+     #determine jump address for JP command       
     elif routine_name == 'jp':
         generated_code[stack.pop()[2]][1] = len(generated_code)
     elif routine_name == 'label':
@@ -452,7 +458,7 @@ def flush_outputs():
 
 
 #####################################################################################################################
-
+#output function
 code_gen('type_specifier', 'void', -1)
 code_gen('put_id', 'output', -1)
 code_gen('fun_declaration', None, -1)
