@@ -233,6 +233,7 @@ def code_gen(routine_name, token, line_n):
                         ['', '#', runtime_stack_ptr],
                         runtime_address_stack_frame])
         get_new_stack_tmp()
+#apply the operation, which has pushed into stack before, to operands
     elif routine_name == 'do_operation':
         tmp = get_new_stack_tmp()
         # print(stack[-3:])
@@ -248,6 +249,7 @@ def code_gen(routine_name, token, line_n):
         stack.pop()
         stack.pop()
         stack.append(tmp)
+#push the operation which should be applied later into the stack
     elif routine_name == 'save_operation':
         if token == '+':
             stack.append('ADD')
@@ -259,6 +261,7 @@ def code_gen(routine_name, token, line_n):
             stack.append('EQ')
         elif token == '<':
             stack.append('LT')
+#push ID token and its line into stack
     elif routine_name == 'pid':
         stack.append(get_var(line_n, token))
     elif routine_name == 'array_index':
@@ -287,12 +290,17 @@ def code_gen(routine_name, token, line_n):
             stack[-2]
         ])
         stack.pop()
+#push NUM into stack
     elif routine_name == 'push':
         stack.append(['int', '#', str(token)])
     elif routine_name == 'start_args':
         function_call_args.append([])
+#add top element of stack (argument of called function) to function's arguments array
     elif routine_name == 'fill_record':
         function_call_args[-1].append(stack.pop())
+#pop called function's arguments and then check types of arguments and parameters.
+Consider 2 free memory cell for return value and return address.
+Assign each argument to its corresponding parameter.
     elif routine_name == 'call_function':
         f = stack.pop()
         # print(f)
