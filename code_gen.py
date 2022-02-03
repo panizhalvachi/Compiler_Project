@@ -59,7 +59,7 @@ reserved_global_vars = [get_new_global_tmp() for i in range(4)]
 generated_code.append(['JP'])
 main_starter_jump = len(generated_code) - 1
 
-# load action symbol and its corresponding transition state 
+# return action symbol and its corresponding transition state 
 def load_action_symbols(file_path="action_symbols.txt"):
     node_actions = {}
     edge_actions = {}
@@ -79,7 +79,7 @@ def load_action_symbols(file_path="action_symbols.txt"):
 
 node_actions, edge_actions = load_action_symbols()
 
-
+#run corresponding subroutine of action symbol(which is mentioned as node_action here)
 def code_gen_node(node, line_n):
     # # print(node)
     if node in node_actions:
@@ -90,6 +90,7 @@ def code_gen_node(node, line_n):
 def code_gen_edge(snode, dnode, token, line_n, tp='start'):
     if token != '$':
         token = token[1]
+#this case happened when we must apply an action in transition edge.
     if (snode, dnode, tp) in edge_actions:
         # print(snode, dnode, tp)
         code_gen(edge_actions[(snode, dnode, tp)], token, line_n)
@@ -120,18 +121,22 @@ def get_new_stack_address(sz=1):
 
 
 # not complete
+#return the address of given variable
 def get_var(line_n, pid):
+#if the given variable belongs to local variables, then return its address
     if pid in local_action_table:
         return local_action_table[pid]
+#if the given variable belongs to global variables, then return its address
     elif pid in global_action_table:
         return global_action_table[pid]
+#if there is not any variable with the given ID, then show semantic error
     else:
         semantic_checks.scoping_error(line_n, pid)
         return [
             'NA', '', 0
         ]  # we return something meaningful enough to prevent errors ...
 
-
+#returns a free cell in stack to use it as a temp variable
 def get_new_stack_tmp():
     address = get_new_stack_address()
     return ["NA", "$", address]
