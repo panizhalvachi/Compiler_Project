@@ -41,7 +41,7 @@ def get_new_global_address(sz=1):
     global_section_ptr += 4 * sz
     return global_section_ptr - 4 * sz
 
-#return free global address
+#return free global address to use it as a temp variable
 def get_new_global_tmp():
     address = get_new_global_address()
     interpret_code([
