@@ -1,0 +1,42 @@
+main_starter 2
+put_id 10 11
+none_array_declaration 14 18
+array_declaration 15 16
+fun_declaration 19
+fun_declaration_end 23
+type_specifier 24 25
+type_specifier 26 27
+put_id 27 28
+param_type_array 39 40
+param_type_n_array 38 40
+pop 52
+save_break 161
+save_if 58
+jpf 61 64 end
+jpf_save 62
+jp 63
+label 66
+until 71
+return_void 75 77 end
+return_value 75 76 end
+pid 78 80
+assign 86 85 end
+array_index 84
+assign 88 89 end
+save_operation 98 99
+do_operation 99 100 end
+save_operation 112 113
+do_operation 114
+save_operation 127 128
+do_operation 129
+pid 131 135
+push 131 134
+start_args 137
+call_function 138 139 end
+array_index 142
+start_args 145
+call_function 146 147 end
+push 148 151
+fill_record 155
+fill_record 159
+save_stack_frame 22
