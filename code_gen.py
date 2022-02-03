@@ -41,7 +41,7 @@ def get_new_global_address(sz=1):
     global_section_ptr += 4 * sz
     return global_section_ptr - 4 * sz
 
-
+#return free global address
 def get_new_global_tmp():
     address = get_new_global_address()
     interpret_code([
@@ -59,7 +59,7 @@ reserved_global_vars = [get_new_global_tmp() for i in range(4)]
 generated_code.append(['JP'])
 main_starter_jump = len(generated_code) - 1
 
-
+# load action symbol and its corresponding transition state 
 def load_action_symbols(file_path="action_symbols.txt"):
     node_actions = {}
     edge_actions = {}
@@ -186,6 +186,7 @@ def code_gen(routine_name, token, line_n):
         else:
             address = get_new_global_address(int(token))
             global_action_table[pid] = ["array", "#", address]
+#declare function and add its record
     elif routine_name == 'fun_declaration':
         fname = stack.pop()
         return_tp = stack.pop()
@@ -196,6 +197,7 @@ def code_gen(routine_name, token, line_n):
         if debug_mode:
             generated_code.append(['PRINT', 5000])
             generated_code.append(['PRINT', 5004])
+#reset all ther variables and arrays
     elif routine_name == 'fun_declaration_end':
         code_gen('return_void', None, line_n)
         local_action_table = {}
@@ -339,6 +341,7 @@ Assign each argument to its corresponding parameter.
         return_value[0] = f['return_type']
         stack.append(return_value)
         runtime_stack_ptr = tmp2
+#adjust stack frame address and jump to where we called the function
     elif routine_name == 'return_void':
         interpret_code([
             'ADD',
@@ -362,6 +365,7 @@ Assign each argument to its corresponding parameter.
             'JP',
             ['', '@', reserved_global_vars[3][2]]
         ])
+#adjust stack frame and assign return value(which is in the cell 4 of stack) to the global var which has been considered for the return value
     elif routine_name == 'return_value':
         interpret_code([
             'ASSIGN',
@@ -392,6 +396,7 @@ Assign each argument to its corresponding parameter.
         ])
     elif routine_name == 'pop':
         stack.pop()
+#if we have reached a break out of repeat block then detect it as a semantic error.otherwise, add it to the current repeat block array
     elif routine_name == 'save_break':
         interpret_code([
             "JP",
@@ -401,6 +406,7 @@ Assign each argument to its corresponding parameter.
             semantic_checks.break_semantic_error(line_n)
         else:
             repeat[-1].append(len(generated_code) - 1)
+#add JPF command and fill it with appropriate addrees later
     elif routine_name == 'save_if':
         interpret_code([
             "JPF",
